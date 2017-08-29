@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using OurFirstApi.DataAccess;
 using OurFirstApi.Models;
 using System;
 using System.Collections.Generic;
@@ -14,26 +15,19 @@ namespace OurFirstApi.Controllers
     public class DeleteEmployeeController : ApiController
     {
         //api/employees
-        public HttpResponseMessage Put(int id, EmployeeListResult employee)
+        public HttpResponseMessage Delete(int id)
         {
-            using (var connection =
-                new SqlConnection(ConfigurationManager.ConnectionStrings["Chinook"].ConnectionString))
+            try
             {
-                try
-                {
-                    connection.Open();
-
-                    var result = connection.Execute("delete from Employee where EmployeeId = @EmployeeId",
-                                                    new { EmployeeId = employee.EmployeeId});
-
-                    return Request.CreateResponse(HttpStatusCode.OK, result);
-                }
-                catch (Exception ex)
-                {
-                    return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Delete employee blew up");
-                }
+                var deleteEmployeeData = new EmployeeDataAccess();
+                deleteEmployeeData.Delete(id);
+            
+                return Request.CreateResponse(HttpStatusCode.OK);
             }
-        }
-
+            catch (Exception ex)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Delete employee blew up");
+            }
+        }       
     }
 }

@@ -8,6 +8,7 @@ using System.Net.Http;
 using System.Web.Http;
 using Dapper;
 using OurFirstApi.Models;
+using OurFirstApi.DataAccess;
 
 namespace OurFirstApi.Controllers
 {
@@ -17,18 +18,13 @@ namespace OurFirstApi.Controllers
         //api/employees
         public HttpResponseMessage Get()
         {
-            using (var connection =
-                new SqlConnection(ConfigurationManager.ConnectionStrings["Chinook"].ConnectionString))
-            {
+          
                 try
                 {
-                    connection.Open();
+                    var allEmployeeData = new EmployeeDataAccess();
+                    var employees = allEmployeeData.GetAll();
 
-                    var result = connection.Query<EmployeeListResult>("select * " +
-                                                                      "from Employee");
-
-
-                    return Request.CreateResponse(HttpStatusCode.OK, result);
+                    return Request.CreateResponse(HttpStatusCode.OK, employees);
                 }
                 catch (Exception ex)
                 {
@@ -37,28 +33,22 @@ namespace OurFirstApi.Controllers
                     return Request.CreateErrorResponse(HttpStatusCode.InternalServerError, "Query blew up");
                 }
             }
-        }
+        
 
         //api/employees/3000
         public HttpResponseMessage Get(int id)
         {
-            using (var connection =
-                new SqlConnection(ConfigurationManager.ConnectionStrings["Chinook"].ConnectionString))
             {
                 try
                 {
-                    connection.Open();
+                    var employeeData = new EmployeeDataAccess();
+                    var employee = employeeData.Get(id);    
+                    if (employee == null)
+                        {
+                            return Request.CreateErrorResponse(HttpStatusCode.NotFound,$"Employee with the Id {id} was not found");
+                        }
 
-                    var result =
-                        connection.Query<EmployeeListResult>("Select * From Employee where EmployeeId = @id",
-                            new {id = id}).FirstOrDefault();
-
-                    if (result == null)
-                    {
-                        return Request.CreateErrorResponse(HttpStatusCode.NotFound,$"Employee with the Id {id} was not found");
-                    }
-
-                    return Request.CreateResponse(HttpStatusCode.OK, result);
+                        return Request.CreateResponse(HttpStatusCode.OK, employee);
                 }
                 catch (Exception ex)
                 {
