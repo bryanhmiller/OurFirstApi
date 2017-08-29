@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using OurFirstApi.DataAccess;
 using OurFirstApi.Models;
 using System;
 using System.Collections.Generic;
@@ -21,14 +22,10 @@ namespace OurFirstApi.Controllers
             {
                 try
                 {
-                    connection.Open();
+                    var addEmployeeData = new EmployeeDataAccess();
+                    addEmployeeData.Add(employee);
 
-                    var result = connection.Execute("Insert into Employee(Firstname, LastName) " +
-                                                            "Values(@firstName,@lastName)",
-                                                            new { FirstName = employee.FirstName, LastName = employee.LastName});
-
-
-                    return Request.CreateResponse(HttpStatusCode.OK, result);
+                    return Request.CreateResponse(HttpStatusCode.OK);
                 }
                 catch (Exception ex)
                 {
